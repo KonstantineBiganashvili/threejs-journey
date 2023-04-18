@@ -1,8 +1,28 @@
+import * as dat from 'dat.gui';
 import * as THREE from 'three';
+import gsap from 'gsap';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import './style.css';
 
-// Cursor
+const gui = new dat.GUI({ closed: true, width: 500 });
+
+// gui.hide();
+
+const spin = () => {
+  gsap.to(mesh.rotation, { y: mesh.rotation.y + 10, duration: 1 });
+};
+
+const params = {
+  color: 0xff0000,
+  spin,
+};
+
+gui.addColor(params, 'color').onChange(() => {
+  material.color.set(params.color);
+});
+
+gui.add(params, 'spin');
+
 const cursor = {
   x: 0,
   y: 0,
@@ -16,7 +36,7 @@ window.addEventListener('mousemove', (e) => {
 const scene = new THREE.Scene();
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({
-  color: 0xff0000,
+  color: params.color,
 });
 const canvas = document.querySelector('.webgl');
 
@@ -29,7 +49,6 @@ const sizes = {
 };
 
 window.addEventListener('resize', () => {
-  // Update sizes
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
 
@@ -79,6 +98,10 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
+
+gui.add(mesh.position, 'x').min(-3).max(3).step(0.01).name('Redcube X');
+gui.add(mesh, 'visible');
+gui.add(material, 'wireframe');
 
 const tick = () => {
   controls.update();
