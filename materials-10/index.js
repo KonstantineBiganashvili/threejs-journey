@@ -14,6 +14,7 @@ const canvas = document.querySelector('canvas.webgl');
 
 // Textures
 const textureLoader = new THREE.TextureLoader();
+const cubeTextureLoader = new THREE.CubeTextureLoader();
 
 // Door Textures
 const colorTexture = textureLoader.load('/textures/door/color.jpg');
@@ -39,6 +40,18 @@ const gradientTexture = textureLoader.load('/textures/gradients/3.jpg');
 // gradientTexture.generateMipmaps = false;
 //
 
+// https://hdri-haven.com/ or https://polyhaven.com/ for environment maps
+// https://matheowis.github.io/HDRI-to-CubeMap/ to convert HDRI to cubemap
+
+const environmentMapTexture = cubeTextureLoader.load([
+  '/textures/environmentMaps/3/px.jpg',
+  '/textures/environmentMaps/3/nx.jpg',
+  '/textures/environmentMaps/3/py.jpg',
+  '/textures/environmentMaps/3/ny.jpg',
+  '/textures/environmentMaps/3/pz.jpg',
+  '/textures/environmentMaps/3/nz.jpg',
+]);
+
 // Scene
 const scene = new THREE.Scene();
 
@@ -60,13 +73,33 @@ const scene = new THREE.Scene();
 // const material = new THREE.MeshToonMaterial();
 // material.gradientMap = gradientTexture;
 
+// const material = new THREE.MeshStandardMaterial();
+// You should not combaine metalness and roughness with maps of same properties
+// material.metalness = 0.45;
+// material.roughness = 0.65;
+// material.map = colorTexture;
+// material.aoMap = ambientOcclusionTexture;
+// material.aoMapIntensity = 1;
+// material.displacementMap = heightTexture;
+// material.displacementScale = 0.02;
+// material.metalnessMap = metalnessTexture;
+// material.roughnessMap = roughnessTexture;
+// material.normalMap = normalTexture;
+// material.normalScale.set(0.5, 0.5);
+// material.transparent = true;
+// material.alphaMap = alphaTexture;
+
 const material = new THREE.MeshStandardMaterial();
-material.metalness = 0.45;
-material.roughness = 0.65;
-material.map = colorTexture;
+material.metalness = 0.7;
+material.roughness = 0.2;
+material.envMap = environmentMapTexture;
 
 gui.add(material, 'roughness').min(0).max(1).step(0.001);
 gui.add(material, 'metalness').min(0).max(1).step(0.001);
+gui.add(material, 'aoMapIntensity').min(0).max(1).step(0.01);
+gui.add(material, 'displacementScale').min(0).max(0.1).step(0.0001);
+gui.add(material.normalScale, 'x').min(0).max(1).step(0.01);
+gui.add(material.normalScale, 'y').min(0).max(1).step(0.01);
 
 // Can combine color and map(texture)
 // material.color = { r: 1, g: 0, b: 0 };
@@ -79,16 +112,28 @@ gui.add(material, 'metalness').min(0).max(1).step(0.001);
 // material.alphaMap = alphaTexture;
 // material.side = THREE.DoubleSide;
 
-const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), material);
+const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 64), material);
 sphere.position.x = -1.5;
+sphere.geometry.setAttribute(
+  'uv2',
+  new THREE.BufferAttribute(sphere.geometry.attributes.uv.array, 2)
+);
 
 const torus = new THREE.Mesh(
-  new THREE.TorusGeometry(0.3, 0.2, 16, 32),
+  new THREE.TorusGeometry(0.3, 0.2, 64, 128),
   material
 );
 torus.position.x = 1.5;
+torus.geometry.setAttribute(
+  'uv2',
+  new THREE.BufferAttribute(torus.geometry.attributes.uv.array, 2)
+);
 
-const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
+const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1, 100, 100), material);
+plane.geometry.setAttribute(
+  'uv2',
+  new THREE.BufferAttribute(plane.geometry.attributes.uv.array, 2)
+);
 
 scene.add(sphere, plane, torus);
 
