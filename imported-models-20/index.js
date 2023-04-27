@@ -28,10 +28,14 @@ gltfLoader.load(
   '/models/Fox/glTF/Fox.gltf',
   (model) => {
     mixer = new THREE.AnimationMixer(model.scene);
-    const action = mixer.clipAction(model.animations[1]);
-    const secondAction = mixer.clipAction(model.animations[0]);
+    const action = mixer.clipAction(model.animations[0]);
+    const secondAction = mixer.clipAction(model.animations[1]);
+    const thirdAction = mixer.clipAction(model.animations[2]);
+
     action.play();
     secondAction.play();
+    // thirdAction.play();
+
     model.scene.scale.set(0.025, 0.025, 0.025);
 
     // const copiedModels = [...model.scene.children];
